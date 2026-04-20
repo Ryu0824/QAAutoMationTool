@@ -150,6 +150,23 @@ npm run dist             # 설치 파일 패키징 (electron-builder)
 
 ---
 
+## Git 워크플로우
+
+- **main 브랜치는 직접 수정 금지** — PR 머지로만 반영
+- 모든 작업은 별도 브랜치에서 진행
+
+```bash
+# 기능 추가
+git checkout -b feature/기능명
+
+# 버그 픽스
+git checkout -b fix/버그명
+```
+
+- 작업 완료 후 GitHub PR 생성 → 리뷰 → main 머지
+
+---
+
 ## Future: Mobile Support
 
 모바일 확장 시 `ActionAdapter` 인터페이스를 구현하는 `ADBAdapter`를 추가하는 방식으로 확장.
