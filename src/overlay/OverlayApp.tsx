@@ -74,11 +74,17 @@ export default function OverlayApp() {
     }
 
     const img = imgRef.current!
+    const scaleX = img.naturalWidth / img.offsetWidth
+    const scaleY = img.naturalHeight / img.offsetHeight
+    const sx = x * scaleX
+    const sy = y * scaleY
+    const sw = w * scaleX
+    const sh = h * scaleY
     const canvas = document.createElement('canvas')
-    canvas.width = w
-    canvas.height = h
+    canvas.width = Math.round(sw)
+    canvas.height = Math.round(sh)
     const ctx = canvas.getContext('2d')!
-    ctx.drawImage(img, x, y, w, h, 0, 0, w, h)
+    ctx.drawImage(img, sx, sy, sw, sh, 0, 0, canvas.width, canvas.height)
     const imageBase64 = canvas.toDataURL('image/png').split(',')[1]
 
     window.overlayApi.complete({ x, y, w, h, imageBase64 })
