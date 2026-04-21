@@ -13,7 +13,9 @@ contextBridge.exposeInMainWorld('api', {
   capture: {
     screen: () => ipcRenderer.invoke('capture:screen'),
     region: (x: number, y: number, w: number, h: number) =>
-      ipcRenderer.invoke('capture:region', x, y, w, h)
+      ipcRenderer.invoke('capture:region', x, y, w, h),
+    openOverlay: (mode: 'point' | 'region') =>
+      ipcRenderer.invoke('capture:openOverlay', mode)
   },
   // Action
   action: {
@@ -38,6 +40,8 @@ contextBridge.exposeInMainWorld('api', {
     openDialog: () => ipcRenderer.invoke('template:openDialog'),
     list: () => ipcRenderer.invoke('template:list'),
     load: (name: string) => ipcRenderer.invoke('template:load', name),
-    delete: (name: string) => ipcRenderer.invoke('template:delete', name)
+    delete: (name: string) => ipcRenderer.invoke('template:delete', name),
+    saveCapture: (imageBase64: string, suggestedName?: string) =>
+      ipcRenderer.invoke('template:saveCapture', imageBase64, suggestedName)
   }
 })

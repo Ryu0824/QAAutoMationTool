@@ -27,6 +27,15 @@ export default function DragForm({ data, onChange }: Props) {
           <Field label="From Y">
             <NumberInput value={data.fromY as number} onChange={(v) => onChange({ fromY: v })} placeholder="0" />
           </Field>
+          <button
+            style={captureBtn}
+            onClick={async () => {
+              const result = await (window as any).api.capture.openOverlay('point')
+              if (result) onChange({ fromX: result.x, fromY: result.y })
+            }}
+          >
+            화면에서 선택
+          </button>
         </>
       ) : (
         <Field label="변수명">
@@ -56,6 +65,15 @@ export default function DragForm({ data, onChange }: Props) {
           <Field label="To Y">
             <NumberInput value={data.toY as number} onChange={(v) => onChange({ toY: v })} placeholder="0" />
           </Field>
+          <button
+            style={captureBtn}
+            onClick={async () => {
+              const result = await (window as any).api.capture.openOverlay('point')
+              if (result) onChange({ toX: result.x, toY: result.y })
+            }}
+          >
+            화면에서 선택
+          </button>
         </>
       ) : (
         <Field label="변수명">
@@ -82,3 +100,15 @@ const toggleBtn = (active: boolean): React.CSSProperties => ({
   borderRadius: 4, color: '#e0e0e0', padding: '4px 0', fontSize: 12, cursor: 'pointer'
 })
 const hint: React.CSSProperties = { fontSize: 10, color: '#888', marginTop: 3 }
+
+const captureBtn: React.CSSProperties = {
+  width: '100%',
+  marginTop: 6,
+  background: '#0a2a50',
+  border: '1px solid #1a6a9a',
+  borderRadius: 4,
+  color: '#7dd3fc',
+  padding: '5px 0',
+  fontSize: 12,
+  cursor: 'pointer'
+}

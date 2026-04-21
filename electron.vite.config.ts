@@ -18,7 +18,8 @@ export default defineConfig({
     build: {
       rollupOptions: {
         input: {
-          index: resolve(__dirname, 'electron/preload.ts')
+          index: resolve(__dirname, 'electron/preload.ts'),
+          overlay: resolve(__dirname, 'electron/overlayPreload.ts')
         }
       }
     }
@@ -28,7 +29,8 @@ export default defineConfig({
     build: {
       rollupOptions: {
         input: {
-          index: resolve(__dirname, 'src/index.html')
+          index: resolve(__dirname, 'src/index.html'),
+          overlay: resolve(__dirname, 'src/overlay.html')
         }
       }
     },

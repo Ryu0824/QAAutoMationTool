@@ -37,3 +37,6 @@ npm-debug.log*
 .idea/
 *.suo
 *.user
+
+# 개인 작업 관리
+TODO.md

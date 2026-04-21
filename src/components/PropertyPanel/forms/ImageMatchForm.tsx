@@ -34,7 +34,22 @@ export default function ImageMatchForm({ data, onChange }: Props) {
   return (
     <>
       <Field label="템플릿 이미지">
-        <button style={uploadBtn} onClick={handleUpload}>+ 이미지 업로드</button>
+        <div style={{ display: 'flex', gap: 4 }}>
+          <button style={{ ...uploadBtn, flex: 1 }} onClick={handleUpload}>+ 이미지 업로드</button>
+          <button
+            style={{ ...uploadBtn, flex: 1, borderColor: '#1a6a9a', color: '#7dd3fc' }}
+            onClick={async () => {
+              const result = await (window as any).api.capture.openOverlay('region')
+              if (result?.imageBase64) {
+                const name = await (window as any).api.template.saveCapture(result.imageBase64)
+                refreshList()
+                onChange({ template: name })
+              }
+            }}
+          >
+            화면에서 캡처
+          </button>
+        </div>
 
         {templates.length === 0 && (
           <p style={{ color: '#555', fontSize: 11, marginTop: 6 }}>업로드된 템플릿 없음</p>
