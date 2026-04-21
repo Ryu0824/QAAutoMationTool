@@ -6,6 +6,7 @@ import DragNode from './ActionNodes/DragNode'
 import DelayNode from './ActionNodes/DelayNode'
 import ImageMatchNode from './ConditionNodes/ImageMatchNode'
 import OCRReadNode from './ConditionNodes/OCRReadNode'
+import WaitForImageNode from './ConditionNodes/WaitForImageNode'
 import LoopNode from './ControlNodes/LoopNode'
 import SequenceNode from './ControlNodes/SequenceNode'
 import SubFlowNode from './ControlNodes/SubFlowNode'
@@ -20,6 +21,7 @@ export const NODE_TYPES: NodeTypes = {
   Delay: DelayNode,
   ImageMatch: ImageMatchNode,
   OCRRead: OCRReadNode,
+  WaitForImage: WaitForImageNode,
   Loop: LoopNode,
   Sequence: SequenceNode,
   SubFlow: SubFlowNode

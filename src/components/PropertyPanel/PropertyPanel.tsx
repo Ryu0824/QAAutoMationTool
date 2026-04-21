@@ -6,6 +6,7 @@ import DragForm from './forms/DragForm'
 import DelayForm from './forms/DelayForm'
 import ImageMatchForm from './forms/ImageMatchForm'
 import OCRReadForm from './forms/OCRReadForm'
+import WaitForImageForm from './forms/WaitForImageForm'
 import LoopForm from './forms/LoopForm'
 import SubFlowForm from './forms/SubFlowForm'
 import FocusWindowForm from './forms/FocusWindowForm'
@@ -17,6 +18,7 @@ const FORM_MAP: Record<string, React.ComponentType<{ data: Record<string, unknow
   Delay: DelayForm,
   ImageMatch: ImageMatchForm,
   OCRRead: OCRReadForm,
+  WaitForImage: WaitForImageForm,
   Loop: LoopForm,
   SubFlow: SubFlowForm,
   FocusWindow: FocusWindowForm
@@ -24,7 +26,7 @@ const FORM_MAP: Record<string, React.ComponentType<{ data: Record<string, unknow
 
 const NODE_LABEL: Record<string, string> = {
   Click: '클릭', KeyInput: '키 입력', Drag: '드래그', Delay: '대기', FocusWindow: '창 포커스',
-  ImageMatch: '이미지 탐색', OCRRead: 'OCR 읽기', Loop: '반복', Sequence: '순차 실행', SubFlow: '서브플로우'
+  ImageMatch: '이미지 탐색', OCRRead: 'OCR 읽기', WaitForImage: '이미지 대기', Loop: '반복', Sequence: '순차 실행', SubFlow: '서브플로우'
 }
 
 export default function PropertyPanel() {
