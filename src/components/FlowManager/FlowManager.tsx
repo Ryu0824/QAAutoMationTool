@@ -36,6 +36,7 @@ declare global {
 
 export default function FlowManager(): React.ReactElement {
   const [flowList, setFlowList] = useState<string[]>([])
+  const [savingName, setSavingName] = useState<string | null>(null)
   const { nodes, edges, currentFlowName, loadFlow, resetFlow, setCurrentFlowName } = useFlowStore()
 
   const refresh = async () => {
@@ -46,10 +47,19 @@ export default function FlowManager(): React.ReactElement {
   useEffect(() => { refresh() }, [])
 
   const handleSave = async () => {
-    const name = currentFlowName ?? prompt('플로우 이름 입력:')
-    if (!name) return
-    await window.api.flow.save(name, { nodes, edges })
-    setCurrentFlowName(name)
+    if (currentFlowName) {
+      await window.api.flow.save(currentFlowName, { nodes, edges })
+      refresh()
+    } else {
+      setSavingName('')
+    }
+  }
+
+  const handleSaveConfirm = async () => {
+    if (!savingName?.trim()) return
+    await window.api.flow.save(savingName.trim(), { nodes, edges })
+    setCurrentFlowName(savingName.trim())
+    setSavingName(null)
     refresh()
   }
 
@@ -69,20 +79,40 @@ export default function FlowManager(): React.ReactElement {
 
   return (
     <div style={styles.container}>
-      <select
-        style={styles.select}
-        value={currentFlowName ?? ''}
-        onChange={(e) => e.target.value && handleLoad(e.target.value)}
-      >
-        <option value="">-- 플로우 선택 --</option>
-        {flowList.map(name => (
-          <option key={name} value={name}>{name}</option>
-        ))}
-      </select>
-      <button style={styles.btn} onClick={handleNew}>새 플로우</button>
-      <button style={{ ...styles.btn, background: '#e94560' }} onClick={handleSave}>저장</button>
-      {currentFlowName && (
-        <button style={{ ...styles.btn, background: '#333' }} onClick={() => handleDelete(currentFlowName)}>삭제</button>
+      {savingName !== null ? (
+        <>
+          <input
+            autoFocus
+            style={styles.input}
+            placeholder="플로우 이름 입력"
+            value={savingName}
+            onChange={(e) => setSavingName(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') handleSaveConfirm()
+              if (e.key === 'Escape') setSavingName(null)
+            }}
+          />
+          <button style={{ ...styles.btn, background: '#e94560' }} onClick={handleSaveConfirm}>확인</button>
+          <button style={{ ...styles.btn, background: '#333' }} onClick={() => setSavingName(null)}>취소</button>
+        </>
+      ) : (
+        <>
+          <select
+            style={styles.select}
+            value={currentFlowName ?? ''}
+            onChange={(e) => e.target.value && handleLoad(e.target.value)}
+          >
+            <option value="">-- 플로우 선택 --</option>
+            {flowList.map(name => (
+              <option key={name} value={name}>{name}</option>
+            ))}
+          </select>
+          <button style={styles.btn} onClick={handleNew}>새 플로우</button>
+          <button style={{ ...styles.btn, background: '#e94560' }} onClick={handleSave}>저장</button>
+          {currentFlowName && (
+            <button style={{ ...styles.btn, background: '#333' }} onClick={() => handleDelete(currentFlowName)}>삭제</button>
+          )}
+        </>
       )}
     </div>
   )
@@ -90,6 +120,16 @@ export default function FlowManager(): React.ReactElement {
 
 const styles: Record<string, React.CSSProperties> = {
   container: { display: 'flex', alignItems: 'center', gap: 8, marginLeft: 'auto' },
+  input: {
+    background: '#0f3460',
+    color: '#e0e0e0',
+    border: '1px solid #e94560',
+    borderRadius: 4,
+    padding: '4px 8px',
+    fontSize: 13,
+    outline: 'none',
+    width: 160
+  },
   select: {
     background: '#0f3460',
     color: '#e0e0e0',
