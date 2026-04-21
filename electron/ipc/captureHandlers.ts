@@ -24,18 +24,18 @@ async function captureToFile(): Promise<string> {
   return tmpPath
 }
 
+export async function captureScreenBase64(): Promise<string> {
+  const tmpPath = await captureToFile()
+  const buf = await readFile(tmpPath)
+  await unlink(tmpPath)
+  return buf.toString('base64')
+}
+
 export function registerCaptureHandlers(): void {
-  ipcMain.handle('capture:screen', async () => {
-    const tmpPath = await captureToFile()
-    const buf = await readFile(tmpPath)
-    await unlink(tmpPath)
-    return buf.toString('base64')
-  })
+  ipcMain.handle('capture:screen', () => captureScreenBase64())
 
   ipcMain.handle('capture:region', async (_e, x: number, y: number, w: number, h: number) => {
-    const tmpPath = await captureToFile()
-    const buf = await readFile(tmpPath)
-    await unlink(tmpPath)
+    const buf = Buffer.from(await captureScreenBase64(), 'base64')
     const jimg = await Jimp.read(buf)
     jimg.crop({ x, y, w, h })
     return (await jimg.getBuffer('image/png')).toString('base64')

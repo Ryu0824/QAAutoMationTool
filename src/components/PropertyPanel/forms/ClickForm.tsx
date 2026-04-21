@@ -32,6 +32,15 @@ export default function ClickForm({ data, onChange }: Props) {
           <Field label="Y 좌표">
             <NumberInput value={data.y as number} onChange={(v) => onChange({ y: v })} placeholder="0" />
           </Field>
+          <button
+            style={captureBtn}
+            onClick={async () => {
+              const result = await (window as any).api.capture.openOverlay('point')
+              if (result) onChange({ x: result.x, y: result.y })
+            }}
+          >
+            화면에서 선택
+          </button>
         </>
       ) : (
         <Field label="변수명">
@@ -64,6 +73,18 @@ export default function ClickForm({ data, onChange }: Props) {
 const toggleRow: React.CSSProperties = {
   display: 'flex',
   gap: 4
+}
+
+const captureBtn: React.CSSProperties = {
+  width: '100%',
+  marginTop: 6,
+  background: '#0a2a50',
+  border: '1px solid #1a6a9a',
+  borderRadius: 4,
+  color: '#7dd3fc',
+  padding: '5px 0',
+  fontSize: 12,
+  cursor: 'pointer'
 }
 
 const toggleBtn = (active: boolean): React.CSSProperties => ({

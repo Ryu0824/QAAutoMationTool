@@ -42,4 +42,12 @@ export function registerTemplateHandlers(): void {
     await fs.unlink(filePath)
     return { ok: true }
   })
+
+  ipcMain.handle('template:saveCapture', async (_e, imageBase64: string, suggestedName?: string) => {
+    await ensureDir()
+    const name = suggestedName ?? `capture_${Date.now()}.png`
+    const dest = join(templatesDir(), name)
+    await fs.writeFile(dest, Buffer.from(imageBase64, 'base64'))
+    return name
+  })
 }

@@ -6,6 +6,7 @@ import { registerActionHandlers } from './ipc/actionHandlers'
 import { registerPythonHandlers } from './ipc/pythonHandlers'
 import { registerTemplateHandlers } from './ipc/templateHandlers'
 import { registerOcrHandlers, terminateOcrWorker } from './ipc/ocrHandlers'
+import { registerOverlayHandlers } from './ipc/overlayHandlers'
 
 const isDev = process.env.NODE_ENV === 'development' || !app.isPackaged
 
@@ -46,6 +47,7 @@ app.whenReady().then(() => {
   registerPythonHandlers()
   registerTemplateHandlers()
   registerOcrHandlers()
+  registerOverlayHandlers()
 
   createWindow()
 
