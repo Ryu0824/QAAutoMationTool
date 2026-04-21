@@ -2,7 +2,7 @@ import React from 'react'
 
 const NODE_CATALOG = [
   { category: 'Action', items: ['Click', 'KeyInput', 'Drag', 'Delay', 'FocusWindow'] },
-  { category: 'Condition', items: ['ImageMatch', 'OCRRead'] },
+  { category: 'Condition', items: ['ImageMatch', 'WaitForImage', 'OCRRead'] },
   { category: 'Control', items: ['Start', 'Loop', 'Sequence', 'SubFlow'] }
 ]
 

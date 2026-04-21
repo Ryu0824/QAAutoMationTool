@@ -202,6 +202,45 @@ export class FlowExecutor {
         break
       }
 
+      case 'WaitForImage': {
+        const templateName = data.template as string
+        if (!templateName) {
+          this.log('  → 템플릿 미설정, 건너뜀')
+          nextHandle = 'timeout'
+          break
+        }
+        const timeout = (data.timeout as number) ?? 10000
+        const interval = (data.interval as number) ?? 500
+        const threshold = (data.threshold as number) ?? 0.8
+        const region = this.buildRegion(data)
+        const templateB64 = await window.api.template.load(templateName)
+
+        const start = Date.now()
+        let found = false
+        this.log(`  → "${templateName}" 탐색 시작 (최대 ${timeout}ms, ${interval}ms 간격)`)
+
+        while (Date.now() - start < timeout && !this.stopped) {
+          const screenB64 = region
+            ? await window.api.capture.region(region.x, region.y, region.w, region.h)
+            : await window.api.capture.screen()
+          const result = await window.api.python.match(screenB64, templateB64, threshold)
+          if (result.found) {
+            found = true
+            this.log(`  → 발견 (${result.confidence.toFixed(2)}) at (${result.x}, ${result.y}) / ${Date.now() - start}ms 경과`)
+            if (data.varName) {
+              this.setVar(data.varName as string, { x: result.x, y: result.y, confidence: result.confidence })
+              this.log(`  → $${data.varName} 에 저장`)
+            }
+            break
+          }
+          await delay(interval)
+        }
+
+        if (!found) this.log(`  → 타임아웃 (${timeout}ms 초과)`)
+        nextHandle = found ? 'found' : 'timeout'
+        break
+      }
+
       case 'OCRRead': {
         const region = this.buildRegion(data)
         const imageB64 = region
