@@ -51,7 +51,7 @@ export const useFlowStore = create<FlowStore>((set) => ({
   onNodesChange: (changes) =>
     set((s) => ({
       nodes: applyNodeChanges(changes, s.nodes),
-      isDirty: s.isDirty || changes.some((c) => c.type !== 'select'),
+      isDirty: s.isDirty || changes.some((c) => c.type !== 'select' && c.type !== 'dimensions'),
     })),
 
   onEdgesChange: (changes) =>
