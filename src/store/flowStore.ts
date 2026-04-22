@@ -51,13 +51,13 @@ export const useFlowStore = create<FlowStore>((set) => ({
   onNodesChange: (changes) =>
     set((s) => ({
       nodes: applyNodeChanges(changes, s.nodes),
-      isDirty: s.isDirty || changes.some((c) => c.type !== 'select' && c.type !== 'dimensions'),
+      isDirty: s.isDirty || changes.some((c) => c.type === 'position' || c.type === 'remove' || c.type === 'add' || c.type === 'reset'),
     })),
 
   onEdgesChange: (changes) =>
     set((s) => ({
       edges: applyEdgeChanges(changes, s.edges),
-      isDirty: s.isDirty || changes.some((c) => c.type !== 'select'),
+      isDirty: s.isDirty || changes.some((c) => c.type === 'remove' || c.type === 'add' || c.type === 'reset'),
     })),
 
   onConnect: (connection) =>

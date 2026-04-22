@@ -35,6 +35,14 @@ contextBridge.exposeInMainWorld('api', {
     ocr: (imageB64: string, region?: { x: number; y: number; w: number; h: number }) =>
       ipcRenderer.invoke('python:ocr', imageB64, region)
   },
+  // App lifecycle
+  app: {
+    onBeforeClose: (cb: () => void) => {
+      ipcRenderer.on('app:before-close', cb)
+      return () => ipcRenderer.removeListener('app:before-close', cb)
+    },
+    confirmClose: () => ipcRenderer.send('app:confirm-close')
+  },
   // Template
   template: {
     openDialog: () => ipcRenderer.invoke('template:openDialog'),

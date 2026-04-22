@@ -31,6 +31,10 @@ declare global {
         load: (name: string) => Promise<string>
         delete: (name: string) => Promise<{ ok: boolean }>
       }
+      app: {
+        onBeforeClose: (cb: () => void) => () => void
+        confirmClose: () => void
+      }
     }
   }
 }

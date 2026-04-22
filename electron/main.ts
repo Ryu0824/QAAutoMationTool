@@ -1,4 +1,4 @@
-import { app, BrowserWindow, shell } from 'electron'
+import { app, BrowserWindow, shell, ipcMain } from 'electron'
 import { join } from 'path'
 import { registerFlowHandlers } from './ipc/flowHandlers'
 import { registerCaptureHandlers } from './ipc/captureHandlers'
@@ -11,6 +11,8 @@ import { registerOverlayHandlers } from './ipc/overlayHandlers'
 const isDev = process.env.NODE_ENV === 'development' || !app.isPackaged
 
 function createWindow(): void {
+  let isConfirmedClose = false
+
   const win = new BrowserWindow({
     width: 1400,
     height: 900,
@@ -26,6 +28,18 @@ function createWindow(): void {
   })
 
   win.once('ready-to-show', () => win.show())
+
+  win.on('close', (e) => {
+    if (!isConfirmedClose) {
+      e.preventDefault()
+      win.webContents.send('app:before-close')
+    }
+  })
+
+  ipcMain.on('app:confirm-close', () => {
+    isConfirmedClose = true
+    win.close()
+  })
 
   win.webContents.setWindowOpenHandler(({ url }) => {
     shell.openExternal(url)
