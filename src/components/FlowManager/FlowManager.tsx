@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { useFlowStore } from '../../store/flowStore'
+import UnsavedChangesModal from './UnsavedChangesModal'
 
 declare global {
   interface Window {
@@ -37,7 +38,8 @@ declare global {
 export default function FlowManager(): React.ReactElement {
   const [flowList, setFlowList] = useState<string[]>([])
   const [savingName, setSavingName] = useState<string | null>(null)
-  const { nodes, edges, currentFlowName, loadFlow, resetFlow, setCurrentFlowName } = useFlowStore()
+  const [pendingAction, setPendingAction] = useState<{ fn: () => void; hideSave?: boolean } | null>(null)
+  const { nodes, edges, currentFlowName, isDirty, loadFlow, resetFlow, setCurrentFlowName, markSaved } = useFlowStore()
 
   const refresh = async () => {
     const list = await window.api.flow.list()
@@ -49,6 +51,7 @@ export default function FlowManager(): React.ReactElement {
   const handleSave = async () => {
     if (currentFlowName) {
       await window.api.flow.save(currentFlowName, { nodes, edges })
+      markSaved()
       refresh()
     } else {
       setSavingName('')
@@ -59,26 +62,78 @@ export default function FlowManager(): React.ReactElement {
     if (!savingName?.trim()) return
     await window.api.flow.save(savingName.trim(), { nodes, edges })
     setCurrentFlowName(savingName.trim())
+    markSaved()
     setSavingName(null)
     refresh()
   }
 
-  const handleLoad = async (name: string) => {
+  const doLoad = async (name: string) => {
     const data = await window.api.flow.load(name)
     loadFlow(name, data.nodes as never, data.edges as never)
   }
 
-  const handleDelete = async (name: string) => {
-    if (!confirm(`"${name}" 플로우를 삭제할까요?`)) return
+  const handleLoad = (name: string) => {
+    if (isDirty) {
+      setPendingAction({ fn: () => doLoad(name) })
+    } else {
+      doLoad(name)
+    }
+  }
+
+  const doDelete = async (name: string) => {
     await window.api.flow.delete(name)
     if (currentFlowName === name) resetFlow()
     refresh()
   }
 
-  const handleNew = () => resetFlow()
+  const handleDelete = (name: string) => {
+    if (!confirm(`"${name}" 플로우를 삭제할까요?`)) return
+    if (isDirty && currentFlowName === name) {
+      setPendingAction({ fn: () => doDelete(name), hideSave: true })
+    } else {
+      doDelete(name)
+    }
+  }
+
+  const doNew = () => resetFlow()
+
+  const handleNew = () => {
+    if (isDirty) {
+      setPendingAction({ fn: doNew })
+    } else {
+      doNew()
+    }
+  }
+
+  const handleModalSave = async () => {
+    if (pendingAction) {
+      const next = pendingAction.fn
+      setPendingAction(null)
+      await handleSave()
+      next()
+    }
+  }
+
+  const handleModalDiscard = () => {
+    if (pendingAction) {
+      const next = pendingAction.fn
+      setPendingAction(null)
+      next()
+    }
+  }
+
+  const handleModalCancel = () => setPendingAction(null)
 
   return (
     <div style={styles.container}>
+      {pendingAction && (
+        <UnsavedChangesModal
+          hideSave={pendingAction.hideSave}
+          onSave={handleModalSave}
+          onDiscard={handleModalDiscard}
+          onCancel={handleModalCancel}
+        />
+      )}
       {savingName !== null ? (
         <>
           <input
@@ -100,7 +155,7 @@ export default function FlowManager(): React.ReactElement {
           <select
             style={styles.select}
             value={currentFlowName ?? ''}
-            onChange={(e) => e.target.value && handleLoad(e.target.value)}
+            onChange={(e) => { if (e.target.value) handleLoad(e.target.value) }}
           >
             <option value="">-- 플로우 선택 --</option>
             {flowList.map(name => (
