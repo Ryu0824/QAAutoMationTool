@@ -8,6 +8,7 @@ interface FlowStore {
   edges: Edge[]
   currentFlowName: string | null
   selectedNodeId: string | null
+  isDirty: boolean
 
   // 실행 상태
   execStatus: ExecutionStatus
@@ -23,6 +24,7 @@ interface FlowStore {
   setCurrentFlowName: (name: string | null) => void
   loadFlow: (name: string, nodes: Node[], edges: Edge[]) => void
   resetFlow: () => void
+  markSaved: () => void
 
   selectNode: (id: string | null) => void
   updateNodeData: (id: string, data: Record<string, unknown>) => void
@@ -38,28 +40,37 @@ export const useFlowStore = create<FlowStore>((set) => ({
   edges: [],
   currentFlowName: null,
   selectedNodeId: null,
+  isDirty: false,
   execStatus: 'idle',
   execNodeId: null,
   execLog: [],
 
-  setNodes: (nodes) => set({ nodes }),
-  setEdges: (edges) => set({ edges }),
+  setNodes: (nodes) => set({ nodes, isDirty: true }),
+  setEdges: (edges) => set({ edges, isDirty: true }),
 
   onNodesChange: (changes) =>
-    set((s) => ({ nodes: applyNodeChanges(changes, s.nodes) })),
+    set((s) => ({
+      nodes: applyNodeChanges(changes, s.nodes),
+      isDirty: s.isDirty || changes.some((c) => c.type !== 'select' && c.type !== 'dimensions'),
+    })),
 
   onEdgesChange: (changes) =>
-    set((s) => ({ edges: applyEdgeChanges(changes, s.edges) })),
+    set((s) => ({
+      edges: applyEdgeChanges(changes, s.edges),
+      isDirty: s.isDirty || changes.some((c) => c.type !== 'select'),
+    })),
 
   onConnect: (connection) =>
-    set((s) => ({ edges: addEdge(connection, s.edges) })),
+    set((s) => ({ edges: addEdge(connection, s.edges), isDirty: true })),
 
   setCurrentFlowName: (name) => set({ currentFlowName: name }),
 
   loadFlow: (name, nodes, edges) =>
-    set({ currentFlowName: name, nodes, edges, selectedNodeId: null }),
+    set({ currentFlowName: name, nodes, edges, selectedNodeId: null, isDirty: false }),
 
-  resetFlow: () => set({ nodes: [], edges: [], currentFlowName: null, selectedNodeId: null }),
+  resetFlow: () => set({ nodes: [], edges: [], currentFlowName: null, selectedNodeId: null, isDirty: false }),
+
+  markSaved: () => set({ isDirty: false }),
 
   selectNode: (id) => set({ selectedNodeId: id }),
 
@@ -67,7 +78,8 @@ export const useFlowStore = create<FlowStore>((set) => ({
     set((s) => ({
       nodes: s.nodes.map((n) =>
         n.id === id ? { ...n, data: { ...n.data, ...data } } : n
-      )
+      ),
+      isDirty: true,
     })),
 
   setExecStatus: (status) => set({ execStatus: status }),
