@@ -7,6 +7,7 @@ contextBridge.exposeInMainWorld('api', {
     load: (name: string) => ipcRenderer.invoke('flow:load', name),
     list: () => ipcRenderer.invoke('flow:list'),
     delete: (name: string) => ipcRenderer.invoke('flow:delete', name),
+    rename: (oldName: string, newName: string) => ipcRenderer.invoke('flow:rename', oldName, newName),
     setPath: (newPath: string) => ipcRenderer.invoke('flow:setPath', newPath)
   },
   // Capture
