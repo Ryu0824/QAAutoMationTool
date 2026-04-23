@@ -4,6 +4,10 @@ import { join } from 'path'
 
 let flowsDir = join(app.getPath('userData'), 'flows')
 
+function getFlowPath(name: string): string {
+  return join(flowsDir, `${name}.flow.json`)
+}
+
 async function ensureDir(dir: string): Promise<void> {
   await fs.mkdir(dir, { recursive: true })
 }
@@ -11,14 +15,12 @@ async function ensureDir(dir: string): Promise<void> {
 export function registerFlowHandlers(): void {
   ipcMain.handle('flow:save', async (_e, name: string, data: unknown) => {
     await ensureDir(flowsDir)
-    const filePath = join(flowsDir, `${name}.flow.json`)
-    await fs.writeFile(filePath, JSON.stringify(data, null, 2), 'utf-8')
+    await fs.writeFile(getFlowPath(name), JSON.stringify(data, null, 2), 'utf-8')
     return { ok: true }
   })
 
   ipcMain.handle('flow:load', async (_e, name: string) => {
-    const filePath = join(flowsDir, `${name}.flow.json`)
-    const raw = await fs.readFile(filePath, 'utf-8')
+    const raw = await fs.readFile(getFlowPath(name), 'utf-8')
     return JSON.parse(raw)
   })
 
@@ -31,8 +33,12 @@ export function registerFlowHandlers(): void {
   })
 
   ipcMain.handle('flow:delete', async (_e, name: string) => {
-    const filePath = join(flowsDir, `${name}.flow.json`)
-    await fs.unlink(filePath)
+    await fs.unlink(getFlowPath(name))
+    return { ok: true }
+  })
+
+  ipcMain.handle('flow:rename', async (_e, oldName: string, newName: string) => {
+    await fs.rename(getFlowPath(oldName), getFlowPath(newName))
     return { ok: true }
   })
 

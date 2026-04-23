@@ -10,6 +10,7 @@ declare global {
         load: (name: string) => Promise<{ nodes: unknown[]; edges: unknown[] }>
         list: () => Promise<string[]>
         delete: (name: string) => Promise<{ ok: boolean }>
+        rename: (oldName: string, newName: string) => Promise<{ ok: boolean }>
         setPath: (path: string) => Promise<{ ok: boolean; path: string }>
       }
       capture: {
@@ -42,6 +43,7 @@ declare global {
 export default function FlowManager(): React.ReactElement {
   const [flowList, setFlowList] = useState<string[]>([])
   const [savingName, setSavingName] = useState<string | null>(null)
+  const [renamingName, setRenamingName] = useState<string | null>(null)
   const [pendingAction, setPendingAction] = useState<{ fn: () => void; hideSave?: boolean } | null>(null)
   const { nodes, edges, currentFlowName, isDirty, loadFlow, resetFlow, setCurrentFlowName, markSaved } = useFlowStore()
 
@@ -128,6 +130,21 @@ export default function FlowManager(): React.ReactElement {
 
   const handleModalCancel = () => setPendingAction(null)
 
+  const handleRenameStart = () => {
+    if (!currentFlowName) return
+    setRenamingName(currentFlowName)
+  }
+
+  const handleRenameConfirm = async () => {
+    if (!currentFlowName || !renamingName?.trim()) return
+    const newName = renamingName.trim()
+    if (newName === currentFlowName) { setRenamingName(null); return }
+    await window.api.flow.rename(currentFlowName, newName)
+    setCurrentFlowName(newName)
+    setFlowList(list => list.map(n => n === currentFlowName ? newName : n))
+    setRenamingName(null)
+  }
+
   return (
     <div style={styles.container}>
       {pendingAction && (
@@ -154,6 +171,21 @@ export default function FlowManager(): React.ReactElement {
           <button style={{ ...styles.btn, background: '#e94560' }} onClick={handleSaveConfirm}>확인</button>
           <button style={{ ...styles.btn, background: '#333' }} onClick={() => setSavingName(null)}>취소</button>
         </>
+      ) : renamingName !== null ? (
+        <>
+          <input
+            autoFocus
+            style={styles.input}
+            value={renamingName}
+            onChange={(e) => setRenamingName(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') handleRenameConfirm()
+              if (e.key === 'Escape') setRenamingName(null)
+            }}
+          />
+          <button style={{ ...styles.btn, background: '#e94560' }} onClick={handleRenameConfirm}>확인</button>
+          <button style={{ ...styles.btn, background: '#333' }} onClick={() => setRenamingName(null)}>취소</button>
+        </>
       ) : (
         <>
           <select
@@ -169,7 +201,10 @@ export default function FlowManager(): React.ReactElement {
           <button style={styles.btn} onClick={handleNew}>새 플로우</button>
           <button style={{ ...styles.btn, background: '#e94560' }} onClick={handleSave}>저장</button>
           {currentFlowName && (
-            <button style={{ ...styles.btn, background: '#333' }} onClick={() => handleDelete(currentFlowName)}>삭제</button>
+            <>
+              <button style={styles.btn} onClick={handleRenameStart}>이름 변경</button>
+              <button style={{ ...styles.btn, background: '#333' }} onClick={() => handleDelete(currentFlowName)}>삭제</button>
+            </>
           )}
         </>
       )}
