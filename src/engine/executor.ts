@@ -260,6 +260,18 @@ export class FlowExecutor {
         break
       }
 
+      case 'If': {
+        const varName = data.varName as string
+        const operator = (data.operator as string) ?? 'exists'
+        const compareValue = data.compareValue as string | undefined
+
+        const varValue = varName ? this.getVar(varName) : undefined
+        const result = this.evaluateCondition(varValue, operator, compareValue)
+        this.log(`  → $${varName ?? '?'} ${operator} ${compareValue ?? ''} → ${result ? '참' : '거짓'}`)
+        nextHandle = result ? 'true' : 'false'
+        break
+      }
+
       case 'Loop': {
         const mode = (data.mode as string) ?? 'count'
         const count = (data.count as number) ?? 1
@@ -317,6 +329,32 @@ export class FlowExecutor {
     const h = data.regionH as number
     if (!x && !y && !w && !h) return null
     return { x: x ?? 0, y: y ?? 0, w: w ?? 100, h: h ?? 100 }
+  }
+
+  private evaluateCondition(value: unknown, operator: string, compareValue: string | undefined): boolean {
+    if (operator === 'exists') return value !== undefined && value !== null && value !== ''
+
+    const strVal = String(value ?? '')
+    const cmp = compareValue ?? ''
+
+    if (['>', '<', '>=', '<='].includes(operator)) {
+      const numVal = Number(value)
+      const numCmp = Number(cmp)
+      if (!isNaN(numVal) && !isNaN(numCmp)) {
+        if (operator === '>') return numVal > numCmp
+        if (operator === '<') return numVal < numCmp
+        if (operator === '>=') return numVal >= numCmp
+        if (operator === '<=') return numVal <= numCmp
+      }
+    }
+
+    switch (operator) {
+      case '==': return strVal === cmp
+      case '!=': return strVal !== cmp
+      case 'contains': return strVal.includes(cmp)
+      case 'regex': try { return new RegExp(cmp).test(strVal) } catch { return false }
+      default: return false
+    }
   }
 
   private compareText(text: string, expect: string, mode: string): boolean {
