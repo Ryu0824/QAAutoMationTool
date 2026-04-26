@@ -11,6 +11,7 @@ import LoopNode from './ControlNodes/LoopNode'
 import SequenceNode from './ControlNodes/SequenceNode'
 import SubFlowNode from './ControlNodes/SubFlowNode'
 import StartNode from './ControlNodes/StartNode'
+import IfNode from './ControlNodes/IfNode'
 
 export const NODE_TYPES: NodeTypes = {
   Start: StartNode,
@@ -24,5 +25,6 @@ export const NODE_TYPES: NodeTypes = {
   WaitForImage: WaitForImageNode,
   Loop: LoopNode,
   Sequence: SequenceNode,
-  SubFlow: SubFlowNode
+  SubFlow: SubFlowNode,
+  If: IfNode
 }

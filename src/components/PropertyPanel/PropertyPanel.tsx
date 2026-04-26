@@ -10,6 +10,7 @@ import WaitForImageForm from './forms/WaitForImageForm'
 import LoopForm from './forms/LoopForm'
 import SubFlowForm from './forms/SubFlowForm'
 import FocusWindowForm from './forms/FocusWindowForm'
+import IfForm from './forms/IfForm'
 
 const FORM_MAP: Record<string, React.ComponentType<{ data: Record<string, unknown>; onChange: (d: Record<string, unknown>) => void }>> = {
   Click: ClickForm,
@@ -21,12 +22,14 @@ const FORM_MAP: Record<string, React.ComponentType<{ data: Record<string, unknow
   WaitForImage: WaitForImageForm,
   Loop: LoopForm,
   SubFlow: SubFlowForm,
-  FocusWindow: FocusWindowForm
+  FocusWindow: FocusWindowForm,
+  If: IfForm
 }
 
 const NODE_LABEL: Record<string, string> = {
   Click: '클릭', KeyInput: '키 입력', Drag: '드래그', Delay: '대기', FocusWindow: '창 포커스',
-  ImageMatch: '이미지 탐색', OCRRead: 'OCR 읽기', WaitForImage: '이미지 대기', Loop: '반복', Sequence: '순차 실행', SubFlow: '서브플로우'
+  ImageMatch: '이미지 탐색', OCRRead: 'OCR 읽기', WaitForImage: '이미지 대기', Loop: '반복', Sequence: '순차 실행', SubFlow: '서브플로우',
+  If: '조건 분기'
 }
 
 export default function PropertyPanel() {
