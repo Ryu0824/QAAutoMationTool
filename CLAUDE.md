@@ -140,6 +140,50 @@ npm run dist             # 설치 파일 패키징 (electron-builder)
 
 ---
 
+## 노드 추가 체크리스트
+
+새 노드 추가 시 수정·생성할 파일 목록 (순서대로):
+
+| # | 파일 | 작업 |
+|---|---|---|
+| 1 | `src/nodes/{카테고리}Nodes/{이름}Node.tsx` | 노드 컴포넌트 신규 생성 |
+| 2 | `src/nodes/index.ts` | `NODE_TYPES`에 import 및 등록 |
+| 3 | `src/components/NodePanel/NodePanel.tsx` | `NODE_CATALOG` 해당 카테고리에 추가 |
+| 4 | `src/components/PropertyPanel/forms/{이름}Form.tsx` | 속성 폼 신규 생성 |
+| 5 | `src/components/PropertyPanel/PropertyPanel.tsx` | `FORM_MAP`, `NODE_LABEL`에 추가 |
+| 6 | `src/engine/executor.ts` | `switch` 문에 실행 케이스 추가 |
+
+### 노드 컴포넌트 패턴 (분기 핸들)
+
+```tsx
+// 단일 출력
+<Handle type="source" position={Position.Bottom} />
+
+// 분기 출력 (예: 참/거짓)
+<Handle type="source" position={Position.Bottom} id="true" style={{ left: '30%' }} />
+<Handle type="source" position={Position.Bottom} id="false" style={{ left: '70%' }} />
+```
+
+### executor 분기 패턴
+
+```ts
+case '노드타입': {
+  // 로직 수행
+  nextHandle = 조건 ? 'true' : 'false'
+  break
+}
+```
+
+### 카테고리별 배경색
+
+| 카테고리 | 색상 |
+|---|---|
+| Action | `#1a2a4a` |
+| Condition | `#1a4a2a` |
+| Control | `#3a1a4a` |
+
+---
+
 ## 개발 원칙
 
 - Electron main/renderer 간 통신은 반드시 IPC를 통해서만 수행 (직접 Node API 노출 금지)
