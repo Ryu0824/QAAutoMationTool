@@ -28,7 +28,13 @@ export function registerTemplateHandlers(): void {
   ipcMain.handle('template:list', async () => {
     await ensureDir()
     const files = await fs.readdir(templatesDir())
-    return files.filter(f => /\.(png|jpe?g|bmp)$/i.test(f))
+    const imageFiles = files.filter(f => /\.(png|jpe?g|bmp)$/i.test(f))
+    return Promise.all(
+      imageFiles.map(async (name) => {
+        const buf = await fs.readFile(join(templatesDir(), name))
+        return { name, thumbnail: buf.toString('base64') }
+      })
+    )
   })
 
   ipcMain.handle('template:load', async (_e, name: string) => {
